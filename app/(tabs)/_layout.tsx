@@ -1,64 +1,3 @@
-
-
-
-// import { Icon } from '@gluestack-ui/themed';
-// import { Tabs } from 'expo-router';
-// import { House, ShoppingBag, User } from 'phosphor-react-native';
-// import React from 'react';
-
-// export default function Layout() {
-//   return (
-//     <Tabs
-//       screenOptions={{
-//         headerShown: false,
-//         tabBarShowLabel: false,
-//         tabBarStyle: { backgroundColor: '#ffffffff', height: 60 },
-//       }}
-//     >
-//       <Tabs.Screen
-//         name="index"
-//         options={{
-//           tabBarIcon: ({ focused }) => (
-//             <Icon
-//               as={House}
-//               h={28}
-//               w={28}
-//               color={focused ? '$black' : '$coolGray400'}
-//             />
-//           ),
-//         }}
-//       />
-//       <Tabs.Screen
-//         name="products"
-//         options={{
-//           tabBarIcon: ({ focused }) => (
-//             <Icon
-//               as={ShoppingBag}
-//               h={28}
-//               w={28}
-//               color={focused ? '$black' : '$coolGray400'}
-//             />
-//           ),
-//         }}
-//       />
-//       <Tabs.Screen
-//         name="account"
-//         options={{
-//           tabBarIcon: ({ focused }) => (
-//             <Icon
-//               as={User}
-//               h={28}
-//               w={28}
-//               color={focused ? '$black' : '$coolGray400'}
-//             />
-//           ),
-//         }}
-//       />
-//     </Tabs>
-//   );
-// }
-
-
 import { Feather, Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import React from 'react';
@@ -107,7 +46,7 @@ export default function TabsLayout() {
       />
 
       <Tabs.Screen
-        name="product"
+        name="cart"
         options={{
           tabBarIcon: ({ focused }) => (
             <Feather
