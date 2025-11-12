@@ -50,16 +50,43 @@ export default function SearchInputScreen() {
                                 alignItems="center"
                                 bg="$coolGray100"
                                 rounded="$full"
-                                px="$4"
+                                px="$3"
                                 py="$2"
                                 space="sm"
+                                justifyContent="space-between"
+                                w="100%"
                             >
-                                <Icon as={MagnifyingGlass} size="lg" color="$coolGray500" />
-                                <Text color="$coolGray500" fontSize="$md">
-                                    🔍 Search..........
-                                </Text>
+                                {/* Ô nhập search */}
+                                <Pressable onPress={() => setIsSearching(true)} flex={1}>
+                                    <HStack alignItems="center" space="sm">
+                                        <Icon as={MagnifyingGlass} size="lg" color="$coolGray500" />
+                                        <Text color="$coolGray500" fontSize="$md">
+                                            Search..........
+                                        </Text>
+                                    </HStack>
+                                </Pressable>
+
+                                {/* Nút bấm search */}
+                                <Pressable
+                                    onPress={() => router.push("/(searchIP)/results")}
+                                    bg="$white"
+                                    borderWidth={1}
+                                    borderColor="$coolGray300"
+                                    p="$2"
+                                    rounded="$full"
+                                    ml="$2"
+                                    shadowColor="$coolGray400"
+                                    shadowOpacity={0.2}
+                                    shadowRadius={2}
+                                >
+                                    <Text color="$coolGray800" fontSize="$lg">
+                                        🔍
+                                    </Text>
+                                </Pressable>
                             </HStack>
+
                         </Pressable>
+
                     ) : (
                         <HStack alignItems="center" space="sm">
 

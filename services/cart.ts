@@ -62,3 +62,13 @@ export const clearCart = async () => {
     throw new Error("Failed to clear cart");
   }
 };
+
+
+export interface CartItem {
+  id: number;
+  userId: number;
+  productId: number;
+  quantity: number;
+  productName: string;
+  productPrice: number;
+}

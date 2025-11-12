@@ -1,3 +1,9 @@
+
+
+import api from "@/services/api";
+import { addToCart, updateCartItem } from "@/services/cart";
+import { useCheckout } from "../(carts)/CheckoutContext";
+
 import {
     Box,
     Button,
@@ -10,25 +16,63 @@ import {
     Text,
     VStack,
 } from "@gluestack-ui/themed";
-import { useRouter } from "expo-router";
+
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { ArrowLeft, Heart } from "lucide-react-native";
-import React, { useState } from "react";
-import { Dimensions } from "react-native";
+import React, { useEffect, useState } from "react";
+import { ActivityIndicator, Alert, Dimensions } from "react-native";
+
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const { width } = Dimensions.get("window");
 
 export default function ProductDetail() {
     const router = useRouter();
-    const [selectedColor, setSelectedColor] = useState("beige");
+    const { id } = useLocalSearchParams(); // 👈 Lấy productId từ router param
+    const [product, setProduct] = useState<any>(null);
+    const [comments, setComments] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    const [selectedColor, setSelectedColor] = useState("#D7A98C");
     const [selectedSize, setSelectedSize] = useState("L");
     const [showFullDesc, setShowFullDesc] = useState(false);
+    const { cartItems, setCartItems } = useCheckout();
 
-    const images = [
-        "https://images.unsplash.com/photo-1541099649105-f69ad21f3246",
-        "https://images.unsplash.com/photo-1602810318383-e3b3b1a4cadd",
-        "https://images.unsplash.com/photo-1520975916090-3105956dac38",
-    ];
+    // ⚙️ Gọi API lấy chi tiết sản phẩm và comment
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                // Gọi song song 2 API
+                const prodRes = await api.get(`/products/${id}`);
+                const cmtRes = await api.get(`/products/${id}/comments`);
+
+                setProduct(prodRes.data);
+                setComments(cmtRes.data.content || cmtRes.data);
+
+            } catch (err) {
+                console.error("Error fetching product:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchData();
+    }, [id]);
+
+    if (loading) {
+        return (
+            <SafeAreaView style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+                <ActivityIndicator size="large" color="black" />
+            </SafeAreaView>
+        );
+    }
+
+    if (!product) {
+        return (
+            <SafeAreaView style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+                <Text color="$red600">Product not found.</Text>
+            </SafeAreaView>
+        );
+    }
 
     const similarProducts = [
         {
@@ -51,65 +95,56 @@ export default function ProductDetail() {
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: "white" }} edges={["top"]}>
             <ScrollView>
-                {/* Image Carousel */}
-                <ScrollView
-                    horizontal
-                    pagingEnabled
-                    showsHorizontalScrollIndicator={false}
-                >
-                    {images.map((uri, i) => (
-                        <Box key={i} w={width} h={400} position="relative">
-                            <Image
-                                source={{ uri }}
-                                alt={`product-${i}`}
-                                w="100%"
-                                h="100%"
-                                resizeMode="cover"
-                            />
-                            {/* Top buttons */}
-                            <HStack
-                                position="absolute"
-                                top={50}
-                                left={20}
-                                right={20}
-                                justifyContent="space-between"
-                                alignItems="center"
-                            >
-                                <Pressable
-                                    bg="$white"
-                                    p="$2"
-                                    rounded="$full"
-                                    shadowColor="$black"
-                                    shadowOpacity={0.1}
-                                    shadowRadius={5}
-                                    onPress={() => router.back()}
-                                >
-                                    <Icon as={ArrowLeft} size="xl" color="$black" />
-                                </Pressable>
+                {/* 🖼 Ảnh sản phẩm */}
+                <Box w={width} h={400} position="relative">
+                    <Image
+                        source={{ uri: product.imageUrl }}
+                        alt={product.name}
+                        w="100%"
+                        h="100%"
+                        resizeMode="cover"
+                    />
+                    <HStack
+                        position="absolute"
+                        top={50}
+                        left={20}
+                        right={20}
+                        justifyContent="space-between"
+                        alignItems="center"
+                    >
+                        <Pressable
+                            bg="$white"
+                            p="$2"
+                            rounded="$full"
+                            shadowColor="$black"
+                            shadowOpacity={0.1}
+                            shadowRadius={5}
+                            onPress={() => router.back()}
+                        >
+                            <Icon as={ArrowLeft} size="xl" color="$black" />
+                        </Pressable>
 
-                                <Pressable
-                                    bg="$white"
-                                    p="$2"
-                                    rounded="$full"
-                                    shadowColor="$black"
-                                    shadowOpacity={0.1}
-                                    shadowRadius={5}
-                                >
-                                    <Icon as={Heart} size="xl" color="$red500" />
-                                </Pressable>
-                            </HStack>
-                        </Box>
-                    ))}
-                </ScrollView>
+                        <Pressable
+                            bg="$white"
+                            p="$2"
+                            rounded="$full"
+                            shadowColor="$black"
+                            shadowOpacity={0.1}
+                            shadowRadius={5}
+                        >
+                            <Icon as={Heart} size="xl" color="$red500" />
+                        </Pressable>
+                    </HStack>
+                </Box>
 
-                {/* Product Info */}
+                {/* 🛍 Thông tin sản phẩm */}
                 <VStack px="$5" py="$4" space="md">
                     <HStack justifyContent="space-between" alignItems="center">
                         <Text fontSize="$xl" fontWeight="bold">
-                            Sportwear Set
+                            {product.name}
                         </Text>
                         <Text fontSize="$xl" fontWeight="bold">
-                            $80.00
+                            ${product.price?.toFixed(2)}
                         </Text>
                     </HStack>
 
@@ -118,7 +153,7 @@ export default function ProductDetail() {
                         <Text color="$coolGray500">(83)</Text>
                     </HStack>
 
-                    {/* Color & Size */}
+                    {/* 🎨 Màu & Kích thước (giữ nguyên) */}
                     <HStack justifyContent="space-between" mt="$3">
                         <VStack>
                             <Text fontWeight="500">Color</Text>
@@ -152,9 +187,7 @@ export default function ProductDetail() {
                                         onPress={() => setSelectedSize(s)}
                                     >
                                         <Text
-                                            color={
-                                                selectedSize === s ? "$black" : "$coolGray500"
-                                            }
+                                            color={selectedSize === s ? "$black" : "$coolGray500"}
                                             fontWeight="500"
                                         >
                                             {s}
@@ -165,35 +198,24 @@ export default function ProductDetail() {
                         </VStack>
                     </HStack>
 
-                    {/* Description */}
+                    {/* 📜 Mô tả sản phẩm */}
                     <VStack mt="$5" space="sm">
                         <Text fontWeight="600" fontSize="$lg">
                             Description
                         </Text>
                         <Text color="$coolGray600" lineHeight="$md">
-                            Sportwear is no longer under culture. It is no longer mixed or
-                            cobbled together as it once was. Sport is fashion today. This top
-                            is oversized in fit and style, may need to size down.
+                            {showFullDesc
+                                ? product.description
+                                : product.description?.substring(0, 120) + "..."}
                             {!showFullDesc && (
-                                <Text
-                                    color="$blue600"
-                                    onPress={() => setShowFullDesc(true)}
-                                >
-                                    {" "}
-                                    Read more
-                                </Text>
-                            )}
-                            {showFullDesc && (
-                                <Text>
-                                    {" "}
-                                    The premium material ensures comfort and durability, making it
-                                    ideal for any occasion.
+                                <Text color="$blue600" onPress={() => setShowFullDesc(true)}>
+                                    {" "}Read more
                                 </Text>
                             )}
                         </Text>
                     </VStack>
 
-                    {/* Reviews */}
+                    {/* ⭐ Thống kê đánh giá (giữ nguyên) */}
                     <VStack mt="$6">
                         <Text fontWeight="600" fontSize="$lg">
                             Reviews
@@ -227,36 +249,29 @@ export default function ProductDetail() {
                             </VStack>
                         </HStack>
 
-                        {/* Reviewer comments */}
+                        {/* 💬 Comment thật từ API */}
                         <VStack mt="$5" space="lg">
-                            {[
-                                {
-                                    name: "Jennifer Rose",
-                                    comment:
-                                        "I love it. Awesome customer service! Helped me out with adding an additional item to my order.",
-                                },
-                                {
-                                    name: "Kelly Rihanna",
-                                    comment:
-                                        "I'm very happy with order. It was delivered on time and good quality. Recommended!",
-                                },
-                            ].map((r, i) => (
-                                <VStack key={i}>
-                                    <HStack alignItems="center" justifyContent="space-between">
-                                        <Text fontWeight="600">{r.name}</Text>
-                                        <Text color="$coolGray400" fontSize="$sm">
-                                            {i === 0 ? "5m ago" : "8m ago"}
+                            {comments.length > 0 ? (
+                                comments.map((cmt, i) => (
+                                    <VStack key={i}>
+                                        <HStack alignItems="center" justifyContent="space-between">
+                                            <Text fontWeight="600">{cmt.userName || "Anonymous"}</Text>
+                                            <Text color="$coolGray400" fontSize="$sm">
+                                                {new Date(cmt.createdAt).toLocaleDateString()}
+                                            </Text>
+                                        </HStack>
+                                        <Text color="$coolGray600" mt="$1">
+                                            {cmt.content}
                                         </Text>
-                                    </HStack>
-                                    <Text color="$coolGray600" mt="$1">
-                                        {r.comment}
-                                    </Text>
-                                </VStack>
-                            ))}
+                                    </VStack>
+                                ))
+                            ) : (
+                                <Text color="$coolGray500">No comments yet.</Text>
+                            )}
                         </VStack>
                     </VStack>
 
-                    {/* Similar Products */}
+                    {/* 🛍 Similar products (giữ nguyên) */}
                     <VStack mt="$7">
                         <Text fontWeight="600" fontSize="$lg" mb="$3">
                             Similar Product
@@ -282,7 +297,41 @@ export default function ProductDetail() {
                 </VStack>
             </ScrollView>
 
-            {/* Bottom CTA */}
+            {/* 🛒 Nút Add to Cart (giữ nguyên) */}
+            {/* <HStack
+                justifyContent="space-between"
+                alignItems="center"
+                px="$5"
+                py="$3"
+                borderTopWidth={1}
+                borderColor="$coolGray200"
+                bg="$white"
+            >
+                <Text fontSize="$lg" fontWeight="bold">
+                    ${product.price?.toFixed(2)}
+                </Text>
+                <Button
+                    bg="$black"
+                    rounded="$full"
+                    px="$10"
+                    py="$3"
+                    onPress={async () => {
+                        try {
+                            const result = await addToCart(product.id, 1);
+                            console.log("Added to cart:", result);
+                        } catch (err) {
+                            console.error(err);
+                        }
+                    }}
+                >
+                    <ButtonText color="$white" fontWeight="bold">
+                        🛒 Add To Cart
+                    </ButtonText>
+                </Button>
+
+            </HStack> */}
+
+
             <HStack
                 justifyContent="space-between"
                 alignItems="center"
@@ -293,20 +342,80 @@ export default function ProductDetail() {
                 bg="$white"
             >
                 <Text fontSize="$lg" fontWeight="bold">
-                    $80.00
+                    ${product.price?.toFixed(2)}
                 </Text>
+                {/* <Button
+                    bg="$black"
+                    rounded="$full"
+                    px="$10"
+                    py="$3"
+                    onPress={async () => {
+                        try {
+                            const existing = cartItems.find(item => item.productId === product.id);
+
+                            if (existing) {
+                                await updateCartItem(existing.id, existing.quantity + 1);
+                                setCartItems(prev =>
+                                    prev.map(item =>
+                                        item.id === existing.id
+                                            ? { ...item, quantity: item.quantity + 1 }
+                                            : item
+                                    )
+                                );
+                                Alert.alert("Thành công!", "Sản phẩm đã được thêm vào giỏ!");
+
+                            } else {
+                                const added = await addToCart(product.id, 1);
+                                setCartItems(prev => [...prev, added]);
+                            }
+                        } catch (err) {
+                            console.error("Add to cart failed:", err);
+                        }
+                    }}
+                >
+                    <ButtonText color="$white" fontWeight="bold">
+                        🛒 Add To Cart
+                    </ButtonText>
+                </Button> */}
+
+
                 <Button
                     bg="$black"
                     rounded="$full"
                     px="$10"
                     py="$3"
-                    onPress={() => { }}
+                    onPress={async () => {
+                        try {
+                            const existing = cartItems.find(item => item.productId === product.id);
+
+                            if (existing) {
+                                await updateCartItem(existing.id, existing.quantity + 1);
+                                setCartItems(prev =>
+                                    prev.map(item =>
+                                        item.id === existing.id
+                                            ? { ...item, quantity: item.quantity + 1 }
+                                            : item
+                                    )
+                                );
+                                Alert.alert("Thành công!", "Đã cập nhật số lượng sản phẩm trong giỏ!");
+                            } else {
+                                const added = await addToCart(product.id, 1);
+                                setCartItems(prev => [...prev, added]);
+                                Alert.alert("Thành công!", "Sản phẩm đã được thêm vào giỏ hàng!");
+                            }
+                        } catch (err) {
+                            console.error("Add to cart failed:", err);
+                            Alert.alert("Lỗi", "Không thể thêm sản phẩm vào giỏ hàng");
+                        }
+                    }}
                 >
                     <ButtonText color="$white" fontWeight="bold">
                         🛒 Add To Cart
                     </ButtonText>
                 </Button>
+
             </HStack>
-        </SafeAreaView>
+
+        </SafeAreaView >
     );
 }

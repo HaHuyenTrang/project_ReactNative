@@ -62,18 +62,7 @@ export default function Search() {
                         </HStack>
                     </Pressable>
 
-                    <Pressable
-                        onPress={() => router.push("/(searchIP)/results")}
-                        ml="$3"
-                        bg="$gray"
-                        p="$3"
-                        rounded="$full"
-                    >
-                        {/* <Icon as={MagnifyingGlass} size="lg" color="$white" /> */}
-                        <Text color="$white" fontSize="$md" fontWeight="bold">
-                            🔍
-                        </Text>
-                    </Pressable>
+
                 </HStack>
 
                 {/* Discover items */}
