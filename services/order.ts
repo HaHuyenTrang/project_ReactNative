@@ -18,7 +18,7 @@ export interface Order {
 }
 
 // Lấy danh sách đơn hàng của user
-export const getMyOrders = async (page = 0, size = 10): Promise<Order[]> => {
+export const getMyOrders = async (page = 0, size = 100): Promise<Order[]> => {
   try {
     const res = await api.get(`/orders?page=${page}&size=${size}`);
     return res.data;

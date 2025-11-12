@@ -6,7 +6,7 @@ import api from "./api";
 export const getProducts = async (
   q?: string,
   page: number = 0,
-  size: number = 10
+  size: number = 100
 ) => {
   try {
     const params: any = { page, size };

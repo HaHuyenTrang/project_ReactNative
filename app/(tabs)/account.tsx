@@ -115,7 +115,7 @@ export default function AccountScreen() {
                     <MenuItem icon={MapPin} label="Address" />
                     <MenuItem icon={CreditCard} label="Payment method" />
                     <MenuItem icon={Gift} label="Voucher" />
-                    <MenuItem icon={Heart} label="My Wishlist" />
+                    <MenuItem icon={Heart} label="My Wishlist" onPress={() => router.push(`/(whishlist)/lovelist`)} />
                     <MenuItem icon={Star} label="Rate this app" />
                     <MenuItem icon={LogOut} label="Log out" color="$red600" onPress={handleLogout} />
                 </VStack>
